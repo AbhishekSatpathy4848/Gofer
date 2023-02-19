@@ -86,3 +86,5 @@ pub fn handle_incoming_conn(mut stream: TcpStream) {
     
     receive_file(stream);
 }
+
+fn main(){}
