@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 encoding = "0.2"
+spake2 = "0.3.1"
+log = "0.4.14"

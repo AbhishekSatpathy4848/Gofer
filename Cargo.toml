@@ -7,3 +7,16 @@ edition = "2021"
 
 [dependencies]
 spmc = "0.3.0"
+spake2 = "0.3.1"
+
+[[bin]]
+name = "client"
+path = "client/src/main.rs"
+
+[[bin]]
+name = "server"
+path = "server/src/main.rs"
+
+[[bin]]
+name = "handler"
+path = "server/src/handler.rs" 
