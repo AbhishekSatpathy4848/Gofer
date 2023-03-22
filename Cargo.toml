@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 spmc = "0.3.0"
 spake2 = "0.3.1"
+aes = "0.8.2"
 
 [[bin]]
 name = "client"

@@ -23,26 +23,28 @@ fn decode_message_size(mut ack_buf: &mut [u8]) -> String {
 
 fn receive_file(mut stream: TcpStream) -> String {
 
+    println!("Inside Recv function");
+
     //let mut accumulator: String = String::new();
-    let mut r = [0u8; 8]; //8 byte buffer
+    let mut r = [0u8; 16]; //8 byte buffer
     
     //read file size
     stream.read(&mut r).unwrap();
     let msg_len_str = decode_message_size(&mut r);
     println!("{:?}", msg_len_str);
 
-    let file_name = "recv.txt";
-    let mut fullname = String::from("./src/");
-    fullname.push_str(&file_name);
+    let file_name = "/Users/abhisheksatpathy/gofer/server/src/recv.txt";
+    // let mut fullname = String::from("./src/");
+    // fullname.push_str(&file_name);
 
     //create a file
 
-    let mut file_buffer = OpenOptions::new().create(true).append(true).open(fullname).unwrap();
+    let mut file_buffer = OpenOptions::new().create(true).append(true).open(file_name).unwrap();
 
     //receive file itself (write to file)
     let mut remaining_data = msg_len_str.parse::<i32>().unwrap();
     while remaining_data != 0 {
-        if remaining_data >= 8 as i32
+        if remaining_data >= 16 as i32
         {
             let slab = stream.read(&mut r);
             match slab {
@@ -77,13 +79,13 @@ fn receive_file(mut stream: TcpStream) -> String {
 
 pub fn handle_incoming_conn(mut stream: TcpStream) {
     
-    let mut data = [0 as u8; 8]; // using 8 byte buffer
+    // let mut data = [0 as u8; 16]; // using 8 byte buffer
 
     // stream.read(&mut data).unwrap();
     // let msg_len_str = decode_message_size(&mut data);
 
     // println!("Message size is {}", msg_len_str);
-    
+    println!("Inside handle Incoming Connections(Recv)");
     receive_file(stream);
 }
 
