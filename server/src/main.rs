@@ -252,8 +252,18 @@ fn send_file(mut stream: TcpStream) {
 
     let mut remaining_data = file_size as i32;
     println!("Bytes:  {:?}",remaining_data.to_string().as_bytes());
+    let len_of_size = remaining_data.to_string().as_bytes().len();
+    let mut a = [0u8;16];
+    for i in (0..16){
+        if(i<len_of_size){
+            a[i] = remaining_data.to_string().as_bytes()[i];
+        }else{
+            a[i] = 0;
+        }
+    }
+    println!("fin {:?}",a);
     stream
-        .write_all(remaining_data.to_string().as_bytes())
+        .write_all(&a)
         .unwrap();
 
     let mut buf = [0u8; 16];
