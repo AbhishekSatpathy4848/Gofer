@@ -253,8 +253,8 @@ fn send_file(mut stream: TcpStream, key:Vec<u8>) {
                 _ => {}
             }
         }
-        println!("Sent file successfully");
     }
+    println!("Sent file successfully");
 }
 
 fn main() {

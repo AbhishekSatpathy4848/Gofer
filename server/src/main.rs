@@ -143,7 +143,10 @@ fn main() {
                                 // println!("Sending client 2 public key\n");
                                 tx_client_2_server.send(public_key_client_2).unwrap();
                                 // println!("Sent public key of client 2 to server\n");
-                                sleep(std::time::Duration::from_secs(5));
+                                // println!("here1");
+                                // sleep(std::time::Duration::from_secs(5));
+                                rx_client_2_server.recv().unwrap();
+                                // println!("here2");
                                 send_file(stream);
                                 println!("Sent file successfully");
                                 client_count = 0;
@@ -203,6 +206,8 @@ fn main() {
                         // while rx.recv().unwrap() != 2 {};
                         // stream.write_all(String::from("Send").as_bytes()).unwrap();
                         handler::handle_incoming_conn(stream);
+                        let mut ack = [0u8;33];
+                        tx_client_1_server.send(ack).unwrap();
                     }
                 });
 
@@ -226,6 +231,8 @@ fn main() {
                     // println!("Received public key from client 2 {:?}\n", received_string);
                     tx_server_client_1.send(received_string).unwrap();
                     // println!("Send public key of client 2 to client 1\n");
+                    let buf = rx_server_client_1.recv().unwrap();
+                    tx_server_client_2.send(buf).unwrap();
 
                 }
             }
