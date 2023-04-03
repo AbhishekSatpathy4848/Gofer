@@ -13,7 +13,7 @@ mod handler;
 fn main() {
     let path = "/Users/abhisheksatpathy/gofer/server/src/recv.txt";
     fs::write(path, "").unwrap();
-    let addr = "192.168.130.182:7878";
+    let addr = "127.0.0.1:7878";
     let server = TcpListener::bind(&addr).unwrap();
     let mut client_count = 0;
 
@@ -85,7 +85,7 @@ fn main() {
                 // let public_key_client_2_mutex_clone = Arc::clone(&public_key_client_2_mutex);
                 // let (mut tx_client_2_server,rx_client_1_server) = spmc::channel();
                 // let test_mutex_clone = Arc::clone(&test_mutex);
-                println!("before thread");
+                // println!("before thread");
                 //thread
                 thread::spawn(move || {
                     // connection succeeded
@@ -96,18 +96,17 @@ fn main() {
                         //waits for clients ack
                         stream.read(&mut temp).unwrap(); //should have passphrase in temp
                         println!(
-                            "Received passphrase {}",
-                            String::from_utf8_lossy(&temp).to_string()
+                            "Received passphrase",
                         );
                         let mut str:String;
                         let mut str2:String;
                             {let passphrase = passphrase_client_mutex_clone.lock().unwrap();
                             str = String::from_utf8_lossy(&temp).to_string();
                             str = str.trim().to_string();
-                            println!("{:?}",str.as_bytes());
+                            // println!("{:?}",str.as_bytes());
                             str2 = passphrase.clone();
                             str2 = str2.trim().to_string();
-                            println!("{:?}",str2.as_bytes());
+                            // println!("{:?}",str2.as_bytes());
                             }
                             
 
@@ -121,15 +120,15 @@ fn main() {
                                 let mut temp = [0u8; 33];
                                 tx_client_2_server.send(temp).unwrap();
                                 temp = rx_client_2_server.recv().unwrap();
-                                println!("Client-1 Public Key {:?}", temp);
+                                // println!("Client-1 Outbound Message {:?}", temp);
                                 // println!("Sending {:?}",temp);
                                 stream.write_all(&temp).unwrap();
-                                println!("Sent message to client");
+                                // println!("Sent message to client");
 
                                 //waiting for client 2 to send its public key
                                 let mut public_key_client_2 = [0u8; 33];
                                 stream.read(&mut public_key_client_2).unwrap();
-                                println!("Public key of client 2 is {:?}", public_key_client_2);
+                                // println!("Public key of client 2 is {:?}", public_key_client_2);
 
                                 //using mutex start
                                 // stream.read(&mut temp).unwrap();
@@ -141,11 +140,12 @@ fn main() {
                                 // tx_client_2_server.send("Start").unwrap();
                                 //using mutex end
 
-                                println!("Sending client 2 public key\n");
+                                // println!("Sending client 2 public key\n");
                                 tx_client_2_server.send(public_key_client_2).unwrap();
-                                println!("Sent public key of client 2 to server\n");
-                                sleep(std::time::Duration::from_secs(2));
+                                // println!("Sent public key of client 2 to server\n");
+                                sleep(std::time::Duration::from_secs(5));
                                 send_file(stream);
+                                println!("Sent file successfully");
                                 client_count = 0;
                             } else {
                                 println!("Passphrase did not match");
@@ -157,10 +157,11 @@ fn main() {
                         //key exchange start
                         let mut passphrase = [0u8; 128];
                         stream.read(&mut passphrase).unwrap();
-                        print!(
-                            "Passphrase is {}",
-                            String::from_utf8_lossy(&passphrase).to_string()
-                        );
+                        println!("Received passphrase");
+                        // print!(
+                        //     "Passphrase is {}",
+                        //     String::from_utf8_lossy(&passphrase).to_string()
+                        // );
                         //attaching explicit scope ensures that the mutex is unlocked immediately after its usage
                         {
                             let mut mutex_guard_passphrase =
@@ -171,14 +172,15 @@ fn main() {
                         //TODO:write code to check ACK in client
                         stream.write_all("ACK".as_bytes()).unwrap();
                         stream.flush().unwrap();
+                        println!("Waiting for client 2...");
                         //33 is the size of the public key vector
                         let mut public_key_client_1 = [0u8; 33];
                         stream.read(&mut public_key_client_1).unwrap();
 
-                        println!(
-                            "Received passphrase {:?} and public key of client 1 {:?}\n",
-                            passphrase, public_key_client_1
-                        );
+                        // println!(
+                        //     "Received passphrase {:?} and public key of client 1 {:?}\n",
+                        //     passphrase, public_key_client_1
+                        // );
 
                         //using mutex
                         // {
@@ -188,14 +190,14 @@ fn main() {
 
                         //using message passing only for public key
                         rx_client_1_server.recv().unwrap();
-                        println!("Received message that client 2 is ready to receive public key\n");
+                        // println!("Received message that client 2 is ready to receive public key\n");
                         tx_client_1_server.send(public_key_client_1).unwrap();
 
                         //using mutex end
                         let mut public_key_client_2 = [0u8; 33];
-                        println!("Waiting.....");
+                        println!("Waiting for file...");
                         public_key_client_2 = rx_client_1_server.recv().unwrap();
-                        println!("Client {:?}", public_key_client_2);
+                        // println!("Client {:?}", public_key_client_2);
                         stream.write_all(&public_key_client_2).unwrap();
 
                         // while rx.recv().unwrap() != 2 {};
@@ -212,18 +214,19 @@ fn main() {
                     tx_server_client_1.send(temp).unwrap();
 
                     let public_key_client_1 = rx_server_client_1.recv().unwrap();
-                    println!(
-                        "Server has received public key of client_1 {:?}\n",
-                        public_key_client_1
-                    );
+                    // println!(
+                    //     "Server has received public key of client_1 {:?}\n",
+                    //     public_key_client_1
+                    // );
                     tx_server_client_2.send(public_key_client_1).unwrap();
                     // sleep(Duration::from_secs(20));
                     // println!("Waiting for client 2s public key\n");
                     // let mut received_string = [0u8;33];
                     let received_string = rx_server_client_2.recv().unwrap();
-                    println!("Received public key from client 2 {:?}\n", received_string);
+                    // println!("Received public key from client 2 {:?}\n", received_string);
                     tx_server_client_1.send(received_string).unwrap();
-                    println!("Send public key of client 2 to client 1\n");
+                    // println!("Send public key of client 2 to client 1\n");
+
                 }
             }
             Err(e) => {
@@ -243,7 +246,8 @@ fn send_file(mut stream: TcpStream) {
     while file_size == 0 {
         file_size = fs::metadata(path).unwrap().len();
     }
-    print!("File size : {}\n", file_size);
+    // print!("File size : {}\n", file_size);
+    
 
     // let file_name = "recv.txt";
     // let mut fullname = String::from("./src/");
@@ -251,7 +255,7 @@ fn send_file(mut stream: TcpStream) {
     // println!("FULLPATH: {:?}", fullname);
 
     let mut remaining_data = file_size as i32;
-    println!("Bytes:  {:?}",remaining_data.to_string().as_bytes());
+    // println!("Bytes:  {:?}",remaining_data.to_string().as_bytes());
     let len_of_size = remaining_data.to_string().as_bytes().len();
     let mut a = [0u8;16];
     for i in (0..16){
@@ -261,7 +265,7 @@ fn send_file(mut stream: TcpStream) {
             a[i] = 0;
         }
     }
-    println!("fin {:?}",a);
+    // println!("fin {:?}",a);
     stream
         .write_all(&a)
         .unwrap();
@@ -276,7 +280,7 @@ fn send_file(mut stream: TcpStream) {
             match file_slab {
                 Ok(n) => {
                     stream.write_all(&buf).unwrap();
-                    println!("sent {} file bytes (big)", n);
+                    // println!("sent {} file bytes (big)", n);
                     remaining_data = remaining_data - n as i32;
                 }
                 _ => {}
@@ -286,11 +290,12 @@ fn send_file(mut stream: TcpStream) {
             match file_slab {
                 Ok(n) => {
                     stream.write_all(&buf).unwrap();
-                    println!("sent {} file bytes (small)", n);
+                    // println!("sent {} file bytes (small)", n);
                     remaining_data = remaining_data - n as i32;
                 }
                 _ => {}
             }
         }
     }
+    println!("Received file successfully");
 }

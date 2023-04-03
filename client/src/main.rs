@@ -26,7 +26,7 @@ fn send() {
     let recv_string = String::from("Recv");
     
     
-    match TcpStream::connect("192.168.130.182:7878") {
+    match TcpStream::connect("127.0.0.1:7878") {
         Ok(mut stream) => {
             println!("Successfully connected to server in port 7878");
 
@@ -44,15 +44,16 @@ fn send() {
 
             if(send_or_recv.trim().eq(&send_string)){
                 stream.write_all(password.as_bytes()).unwrap();
-                println!("Sent password!!");
+                println!("Passphrase sent!!");
                 let mut buffer = [0u8; 16];
                 stream.read(&mut buffer);
                 stream.write_all(&message).unwrap();
-                println!("Sent message");
+                // println!("Outbound message sent");
+                println!("Waiting for client 2...");
                 //waiting for the inbound message/public key of client 2
                 let mut buf = [0u8; 33];
                 stream.read(&mut buf);
-                println!("Received public key of client 2 {:?}",buf);
+                println!("Outbound message of client 2 {:?}",buf);
                 let encryption_key = s1.finish(&buf).unwrap();
                 println!("Encryption key is {:?}",encryption_key);
                 // let path = "./src/testing.txt";
@@ -89,14 +90,16 @@ fn send() {
                 
                 let mut buffer_message = [0u8; 33]; 
                 stream.read(&mut buffer_message).unwrap();
-                println!("Public key is {:?}", buffer_message);
+                println!("Outbound message of client 1 is {:?}", buffer_message);
                 
                 let encryption_key = s1.finish(&buffer_message).unwrap();
                 println!("Encryption key is {:?}",encryption_key);
 
-                println!("Sending {:?}",message);
+                // println!("Sending {:?}",message);
                 stream.write_all(&message).unwrap();
-                println!("Sent message");
+
+                println!("Waiting for file...");
+                // println!("Sent message");
                 // stream.read(&mut buffer_message);
                 // sleep(std::time::Duration::from_secs(10));
 
@@ -183,7 +186,7 @@ fn send_file(mut stream: TcpStream, key:Vec<u8>) {
     io::stdin().read_line(&mut input).unwrap();
     // let fullname = "/Users/abhisheksatpathy/gofer/client/src/random.txt";
     let fullname = &input.trim();
-    println!("name: {}",fullname);
+    // println!("name: {}",fullname);
     let mut file_size = fs::metadata(fullname).unwrap().len();
 
     // let mut file_name = "random.txt";
@@ -194,7 +197,7 @@ fn send_file(mut stream: TcpStream, key:Vec<u8>) {
     let mut msg_len = len.as_bytes();
     // let mut remaining_data =  .parse::<i32>().unwrap();
     let modified_size = ((file_size as i32)/16 + 1)*16;
-    print!("Sent file size: {}\n", modified_size);
+    // print!("Sent file size: {}\n", modified_size);
     stream.write_all(modified_size.to_string().as_bytes()).unwrap();
 
     //open file in binary mode
@@ -215,14 +218,14 @@ fn send_file(mut stream: TcpStream, key:Vec<u8>) {
             match file_slab{
                 Ok(n) => {
                     let mut block = GenericArray::from_mut_slice(&mut buf);
-                    println!("Before text{:?}",block);
+                    // println!("Before text{:?}",block);
                     cipher.encrypt_block(block);
-                    println!("Encrypted text{:?}",block);
+                    // println!("Encrypted text{:?}",block);
 
                     // println!("abc{:?}",buf);
 
                     stream.write_all(&block).unwrap();
-                    println!("sent {} file bytes (big)", n);
+                    // println!("sent {} file bytes (big)", n);
                     remaining_data = remaining_data - n as i32;
                 }
                 _ => {}
@@ -238,18 +241,19 @@ fn send_file(mut stream: TcpStream, key:Vec<u8>) {
                     let mut block = GenericArray::from_mut_slice(&mut buf);
                     let cipher = Aes128::new(&key);
                     // println!("Before encryption:{:?}",block);
-                    println!("Before text{:?}",block);
+                    // println!("Before text{:?}",block);
                     cipher.encrypt_block(block);
-                    println!("Encrypted text{:?}",block);
+                    // println!("Encrypted text{:?}",block);
                     // println!("Encrypted text{:?}",block);
 
                     stream.write_all(&block).unwrap();
-                    println!("sent {} file bytes (small)", n);
+                    // println!("sent {} file bytes (small)", n);
                     remaining_data = remaining_data - n as i32;
                 }
                 _ => {}
             }
         }
+        println!("Sent file successfully");
     }
 }
 
@@ -288,9 +292,9 @@ fn receive_file(mut stream: TcpStream,key: Vec<u8>) -> String {
     
     //read file size
     stream.read(&mut r).unwrap();
-    println!("abhsbaj{:?}",r);
+    // println!("abhsbaj{:?}",r);
     let msg_len_str = decode_message_size(&mut r);
-    println!("Message length{:?}", msg_len_str);
+    // println!("Message length{:?}", msg_len_str);
 
     let file_name = "recv.txt";
     // let mut fullname = String::from("./src/");
@@ -318,7 +322,7 @@ fn receive_file(mut stream: TcpStream,key: Vec<u8>) -> String {
 
                     file_buffer.write_all(&mut block).unwrap();
                     //file_buffer.flush().unwrap();
-                    println!("wrote {} bytes to file", n);
+                    // println!("wrote {} bytes to file", n);
                     remaining_data = remaining_data - n as i32;
                 }
                 _ => {}
@@ -346,5 +350,6 @@ fn receive_file(mut stream: TcpStream,key: Vec<u8>) -> String {
             }
         }
     }
+    println!("Received file successfully");
     String::from("Ok")
 }
