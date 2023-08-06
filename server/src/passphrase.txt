@@ -1,0 +1,26 @@
+apple
+banana
+carrot
+dog
+elephant
+frog
+giraffe 
+honey
+ice cream
+jungle
+kiwi
+lemon
+monkey
+noodle
+orange
+penguin
+queen
+rabbit
+strawberry
+turtle
+unicorn
+violet
+watermelon
+xylophone
+yak
+zebra
