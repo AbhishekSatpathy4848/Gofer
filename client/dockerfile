@@ -1,0 +1,9 @@
+FROM rust:latest
+
+COPY . /app
+
+WORKDIR /app
+
+RUN cargo build --release
+
+# CMD ["/client/target/release/rust-client"]
